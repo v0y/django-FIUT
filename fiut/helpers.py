@@ -81,15 +81,16 @@ def simple_send_email(
     return message.send()
 
 
-def get_page(request, objects, per_page=10, few_visible=3):
+def get_page_and_paginator(request, objects, per_page=10, few_visible=3):
     """
-    Get paginator page
+    Get page and paginator
 
     :param objects: queryset of objects to paginate
     :param per_page: int, number of objects per page
     :param few_visible: numbers visible on beginning and ending of
                         paginator, like: [1, 2, 3 ... 7, 8, 9]
-    :return: paginator page
+    :return: paginator page and paginator
+    :rtype: tuple
     """
     paginator = Paginator(objects, per_page)
     num_pages = paginator.num_pages
@@ -110,7 +111,7 @@ def get_page(request, objects, per_page=10, few_visible=3):
     page.paginator.last_few = range(num_pages - few_visible + 1, num_pages + 1)
     page.paginator.last_few_border = num_pages - few_visible
 
-    return page
+    return page, paginator
 
 
 def slugify(s):
