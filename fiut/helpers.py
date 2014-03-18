@@ -75,8 +75,14 @@ def simple_send_email(
 
     # attach attachments
     if attachments:
-        for attach in attachments.itervalues():
-            message.attach(str(attach), attach.read(), attach.content_type)
+        try:
+            attachments_iterable = attachments.itervalues()
+        except AttributeError:
+            attachments_iterable = attachments.values()
+
+        for attachments_from_field in attachments_iterable:
+            for attach in attachments_from_field:
+                message.attach(str(attach), attach.read(), attach.content_type)
 
     return message.send()
 
