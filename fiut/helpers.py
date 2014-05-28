@@ -1,6 +1,8 @@
 # encoding: utf-8
 
 import datetime
+from itertools import chain
+import types
 
 from django.conf import settings
 from django.core.mail import get_connection, EmailMessage
@@ -21,7 +23,7 @@ def simple_send_email(
         from_email=None, attachments=None, auth_user=None, auth_password=None,
         connection=None, headers=None):
     """
-    Send email using default email backend
+    Send email using default or given email backend
 
     :param subject: String, email subject template path (*.txt)
                     or subject string
@@ -31,7 +33,8 @@ def simple_send_email(
     :param subject_data: dict for extra data for subject template
     :param message_data: dict for extra data for message template
     :param from_email: sender email
-    :param attachments: list of attachments or single attachment
+    :param attachments: list, tuple, generator or dict of attachment
+                        (attachements are values)
     :param auth_user: username for email backend
     :param auth_password: password for email backend
     :param connection: loaded email backend
@@ -75,14 +78,21 @@ def simple_send_email(
 
     # attach attachments
     if attachments:
-        try:
-            attachments_iterable = attachments.itervalues()
-        except AttributeError:
-            attachments_iterable = attachments.values()
+        if type(attachments) is dict:
+            try:
+                attachments_iterable = attachments.itervalues()
+            except AttributeError:
+                attachments_iterable = attachments.values()
+        elif type(attachments) in (tuple, list, types.GeneratorType):
+            attachments_iterable = attachments
+        else:
+            raise TypeError(
+                "Unhandled attachments type: %s" % type(attachments))
 
-        for attachments_from_field in attachments_iterable:
-            for attach in attachments_from_field:
-                message.attach(str(attach), attach.read(), attach.content_type)
+        attachments_iterable = chain.from_iterable(list(attachments_iterable))
+
+        for attach in attachments_iterable:
+            message.attach(str(attach), attach.read(), attach.content_type)
 
     return message.send()
 
