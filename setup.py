@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='django-FIUT',
-    version='0.1.2',
+    version='0.1.3',
     author=u'Rafał Mirończyk',
     author_email='voyageur.pl@gmail.com',
     license='MIT',

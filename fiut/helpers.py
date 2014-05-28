@@ -5,7 +5,7 @@ from itertools import chain
 import types
 
 from django.conf import settings
-from django.core.mail import get_connection, EmailMessage
+from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.template.defaultfilters import slugify as django_slugify
 from django.template.loader import render_to_string
@@ -19,7 +19,8 @@ except NameError:
 
 
 def simple_send_email(
-        subject, message, recipients, subject_data=None, message_data=None,
+        subject, message, recipients, html_message=None,
+        subject_data=None, message_data=None, html_message_data=None,
         from_email=None, attachments=None, auth_user=None, auth_password=None,
         connection=None, headers=None):
     """
@@ -27,11 +28,15 @@ def simple_send_email(
 
     :param subject: String, email subject template path (*.txt)
                     or subject string
-    :param message: String, email content template path (*.htm, *.html or
-                    *.txt) or subject string
+    :param message: String, email content template path (*.txt)
+                    or plain text message
     :param recipients: String or list of strings, each an email address
+    :param html_message: String, email content template path
+                         (*.html, *.html) or html message
     :param subject_data: dict for extra data for subject template
     :param message_data: dict for extra data for message template
+    :param html_message_data: dict for extra data for html message
+                              template
     :param from_email: sender email
     :param attachments: list, tuple, generator or dict of attachment
                         (attachements are values)
@@ -44,7 +49,8 @@ def simple_send_email(
     headers = headers or {}
     from_email = from_email or settings.DEFAULT_FROM_EMAIL
     fail_silently = False if settings.DEBUG else True
-    allowed_message_template_extensions = ('.txt', '.html', '.htm')
+    allowed_message_template_extensions = ('.txt',)
+    allowed_html_message_template_extensions = ('.html', '.htm')
     allowed_subject_template_extensions = ('.txt',)
 
     subject_data = subject_data or {}
@@ -54,14 +60,14 @@ def simple_send_email(
         username=auth_user, password=auth_password,
         fail_silently=fail_silently)
 
-    # parse message template
+    # parse subject template
     if subject.endswith(allowed_subject_template_extensions):
         subject_str = \
             render_to_string(subject, subject_data).replace('\n', ' ')
     else:
         subject_str = subject.replace('\n', ' ')
 
-    # parse subject template
+    # parse message template
     if message.endswith(allowed_message_template_extensions):
         message_str = render_to_string(message, message_data)
     else:
@@ -72,9 +78,18 @@ def simple_send_email(
         recipients = [recipients]
 
     # create email message
-    message = EmailMessage(
+    message = EmailMultiAlternatives(
         subject_str, message_str, from_email, recipients,
         connection=connection, headers=headers)
+
+    # parse and attach html message template
+    if html_message:
+        if html_message.endswith(allowed_html_message_template_extensions):
+            html_message_str = render_to_string(
+                html_message, html_message_data)
+        else:
+            html_message_str = html_message
+        message.attach_alternative(html_message_str, "text/html")
 
     # attach attachments
     if attachments:
