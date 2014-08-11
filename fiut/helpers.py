@@ -153,7 +153,10 @@ def slugify(s):
     :return: slugified string
     """
 
-    return django_slugify(str(s).replace(u'ł', 'l').replace(u'Ł', 'L'))
+    try:
+        return django_slugify(str(s).replace(u'ł', 'l').replace(u'Ł', 'L'))
+    except SyntaxError:
+        return django_slugify(str(s).replace('ł', 'l').replace('Ł', 'L'))
 
 
 def unix_time(datetime_):
