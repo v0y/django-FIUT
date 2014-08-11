@@ -1,5 +1,7 @@
 # encoding: utf-8
 
+from __future__ import unicode_literals
+
 import datetime
 from itertools import chain
 import types
@@ -153,10 +155,7 @@ def slugify(s):
     :return: slugified string
     """
 
-    try:
-        return django_slugify(str(s).replace(u'ł', 'l').replace(u'Ł', 'L'))
-    except SyntaxError:
-        return django_slugify(str(s).replace('ł', 'l').replace('Ł', 'L'))
+    return django_slugify(str(s).replace(str('ł'), 'l').replace(str('Ł'), 'L'))
 
 
 def unix_time(datetime_):
