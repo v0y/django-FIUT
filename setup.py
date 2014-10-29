@@ -6,7 +6,7 @@ from setuptools import setup
 
 setup(
     name='django-FIUT',
-    version='0.1.6',
+    version='0.1.7',
     author='Rafal Mironczyk',
     author_email='voyageur.pl@gmail.com',
     license='MIT',
@@ -17,6 +17,8 @@ setup(
         'Intended Audience :: Developers',
         'Operating System :: OS Independent',
         'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
         'Framework :: Django',
-    ]
+    ],
+    url='https://github.com/v0y/django-FIUT',
 )
