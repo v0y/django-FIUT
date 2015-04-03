@@ -1,3 +1,5 @@
+[![Code Health](https://landscape.io/github/v0y/django-FIUT/master/landscape.svg?style=flat)](https://landscape.io/github/v0y/django-FIUT/master)
+
 Fine, Incredibly Useful Tools
 =============================
 
